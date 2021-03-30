@@ -5,6 +5,8 @@ authors = ["Jonas Maier <1.jmaier.3@gmail.com>"]
 edition = "2018"
 license = "mit"
 keywords = ["no_std", "macro", "no-std", "iterator"]
+description = "QOL macro that creates the cartesian product of multiple iterators"
+repository = "https://github.com/JM4ier/cartesian-rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
