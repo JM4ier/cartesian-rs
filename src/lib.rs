@@ -8,7 +8,7 @@
 //! It behaves the same as nested for loops and brings the advantage of
 //! being more compact, and simplifies breaking and continuing.
 //!
-//! # Example
+//! # Examples
 //! ```
 //! use cartesian::*;
 //!
@@ -16,6 +16,26 @@
 //! for (x, y, z) in cartesian!(0..10, 0..10, 0..10) {
 //!     volume_grid[x][y][z] = x * y + z;
 //! }
+//! ```
+//!
+//! ```
+//! # use cartesian::*;
+//! let (m, n, p) = (3, 3, 1);
+//!
+//! let mut id = vec![vec![0; n]; m];
+//! for (i, j) in cartesian!(0..m, 0..n) {
+//!     id[i][j] = (i == j) as u32;
+//! }
+//!
+//! let col_vec = vec![vec![1], vec![2], vec![4]];
+//!
+//! let mut res = vec![vec![0; p]; m];
+//!
+//! for (i, j, k) in cartesian!(0..m, 0..n, 0..p) {
+//!     res[i][k] += id[i][j] * col_vec[j][k];
+//! }
+//!
+//! assert_eq!(col_vec, res);
 //! ```
 
 /// Helper trait implemented for all tuples up to 26 elements to prepend a value to produce a longer tuple
@@ -105,3 +125,6 @@ fn binary_numbers() {
 
     assert_eq!(acc, "000 001 010 011 100 101 110 111 ");
 }
+
+#[test]
+fn matrix_multiplication() {}
