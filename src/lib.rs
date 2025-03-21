@@ -80,18 +80,31 @@ _impl_tuple_prepend!((
 /// The macro this is all about.
 #[macro_export]
 macro_rules! cartesian {
-    ($iter:expr $(,)?) => {
-        $iter
+    ($head:expr $(,)?) => {
+        $head.into_iter()
     };
-    ($a:expr, $b:expr $(,)?) => {
-        $a.flat_map(|a| {
-            $b.map(move |b| (a, b))
-        })
+
+    // We need this base case to ensure that
+    // 1. `.map(|(head, tail)| tail.prepend(head))` is only called when `tail` is a tuple type.
+    // 2. `.into_iter()` is called exactly once for each macro argument.
+    ($head:expr, $tail:expr $(,)?) => {
+        cartesian!(@ $head.into_iter(), $tail.into_iter())
     };
+
+    // Expression                                              | Type
+    // --------------------------------------------------------+----------------------------------------
+    // $head.into_iter()                                       | impl Iterator<Item = A>
+    // cartesian!($($tail),+)                                  | impl Iterator<Item = (B, C, ...)>
+    // cartesian!(@ $head.into_iter(), cartesian!($($tail),+)) | impl Iterator<Item = (A, (B, C, ...))>
+    // cartesian!(...).map(...)                                | impl Iterator<Item = (A, B, C, ...)>
     ($head:expr $(, $tail:expr)+ $(,)?) => {
-        cartesian!($head, cartesian!($($tail),+)).map(
+        cartesian!(@ $head.into_iter(), cartesian!($($tail),+)).map(
             |(head, tail)| tail.prepend(head)
         )
+    };
+
+    (@ $head:expr, $tail:expr $(,)?) => {
+        $head.flat_map(|h| $tail.map(move |t| (h, t)))
     };
 }
 
@@ -152,4 +165,18 @@ fn trailing_commas() {
     }
 
     assert_eq!(acc, "0 00 01 10 11 000 001 010 011 100 101 110 111 ");
+}
+
+#[test]
+fn by_reference() {
+    let mut acc = String::new();
+
+    let outer = vec![String::from("a"), String::from("b")];
+    let inner = vec![String::from("0"), String::from("1")];
+
+    for (a, b) in cartesian!(&outer, &inner) {
+        acc += &format!("{}{} ", a, b);
+    }
+
+    assert_eq!(acc, "a0 a1 b0 b1 ");
 }
