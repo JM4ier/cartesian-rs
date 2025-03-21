@@ -10,7 +10,7 @@
 //!
 //! # Examples
 //! ```
-//! use cartesian::*;
+//! use cartesian::cartesian;
 //!
 //! let mut volume_grid = vec![vec![vec![0; 10]; 10]; 10];
 //! for (x, y, z) in cartesian!(0..10, 0..10, 0..10) {
@@ -19,7 +19,7 @@
 //! ```
 //!
 //! ```
-//! # use cartesian::*;
+//! # use cartesian::cartesian;
 //! let (m, n, p) = (3, 3, 1);
 //!
 //! let mut id = vec![vec![0; n]; m];
@@ -99,7 +99,7 @@ macro_rules! cartesian {
     // cartesian!(...).map(...)                                | impl Iterator<Item = (A, B, C, ...)>
     ($head:expr $(, $tail:expr)+ $(,)?) => {
         cartesian!(@ $head.into_iter(), cartesian!($($tail),+)).map(
-            |(head, tail)| tail.prepend(head)
+            |(head, tail)| $crate::TuplePrepend::prepend(tail, head)
         )
     };
 
