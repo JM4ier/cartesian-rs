@@ -80,15 +80,15 @@ _impl_tuple_prepend!((
 /// The macro this is all about.
 #[macro_export]
 macro_rules! cartesian {
-    ($iter:expr) => {
+    ($iter:expr $(,)?) => {
         $iter
     };
-    ($a:expr, $b:expr) => {
+    ($a:expr, $b:expr $(,)?) => {
         $a.flat_map(|a| {
             $b.map(move |b| (a, b))
         })
     };
-    ($head:expr, $($tail:expr),+) => {
+    ($head:expr $(, $tail:expr)+ $(,)?) => {
         cartesian!($head, cartesian!($($tail),+)).map(
             |(head, tail)| tail.prepend(head)
         )
@@ -127,4 +127,29 @@ fn binary_numbers() {
 }
 
 #[test]
-fn matrix_multiplication() {}
+fn trailing_commas() {
+    let mut acc = String::new();
+
+    for a in cartesian!(
+        0..1,
+    ) {
+        acc += &format!("{} ", a);
+    }
+
+    for (a, b) in cartesian!(
+        0..2,
+        0..2,
+    ) {
+        acc += &format!("{}{} ", a, b);
+    }
+
+    for (a, b, c) in cartesian!(
+        0..2,
+        0..2,
+        0..2,
+    ) {
+        acc += &format!("{}{}{} ", a, b, c);
+    }
+
+    assert_eq!(acc, "0 00 01 10 11 000 001 010 011 100 101 110 111 ");
+}
